@@ -1,4 +1,5 @@
 #include "cpuLib.h"
+#include "lab1.cuh"
 
 
 void dbprintf(const char* fmt...) {
@@ -74,6 +75,7 @@ int runCpuSaxpy(uint64_t vectorSize) {
 
 	vectorInit(a, vectorSize);
 	vectorInit(b, vectorSize);
+
 	//	C = B
 	std::memcpy(c, b, vectorSize * sizeof(float));
 	float scale = 2.0f;
@@ -94,7 +96,9 @@ int runCpuSaxpy(uint64_t vectorSize) {
 	#endif
 
 	//	C = A + B
+	auto tStart = std::chrono::high_resolution_clock::now();
 	saxpy_cpu(a, c, scale, vectorSize);
+	auto tEnd= std::chrono::high_resolution_clock::now();
 
 	#ifndef DEBUG_PRINT_DISABLE 
 		printf(" c = { ");
@@ -106,6 +110,13 @@ int runCpuSaxpy(uint64_t vectorSize) {
 
 	int errorCount = verifyVector(a, b, c, scale, vectorSize);
 	std::cout << "Found " << errorCount << " / " << vectorSize << " errors \n";
+
+	free(a);
+	free(b);
+	free(c);
+
+	std::chrono::duration<double> time_span = (tEnd- tStart);
+	std::cout << "It took " << time_span.count() << " seconds.";
 
 	return 0;
 }
